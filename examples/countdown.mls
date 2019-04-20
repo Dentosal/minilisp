@@ -1,0 +1,12 @@
+(set (quote counter) (quote 10))
+(set (quote countdown)
+    (quote (block
+        (quote (println counter))
+        (quote (set (quote counter) (dec counter)))
+        (quote (branch (eqtree? counter (quote 0))
+            (quote ())
+            (quote (unquote countdown))
+        ))
+    ))
+)
+(unquote countdown)

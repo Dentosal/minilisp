@@ -1,0 +1,79 @@
+(discard (quote (
+    BOOLEANS AND RELATED OPERATORS
+)))
+
+(set (quote false) ())
+(set (quote true) (quote true))
+
+
+(discard (quote (
+    NOT OPERATOR
+)))
+
+(set (quote not)
+    (lambda (quote b)
+        (quote (branch (eqtree? b false)
+            (quote true)
+            (quote false)
+        ))
+    )
+)
+
+(assert true)
+(assert (not false))
+
+(assert (eqtree? false (not true)))
+(assert (eqtree? true (not false)))
+(assert (eqtree? true (not (not true))))
+(assert (eqtree? false (not (not false))))
+
+(discard (quote (
+    AND OPERATOR
+)))
+
+(set (quote and)
+    (lambda (quote a) (quote b)
+        (quote (branch a
+            (quote (not (not b)))
+            (quote false)
+        ))
+    )
+)
+
+(assert      (and true true))
+(assert (not (and true false)))
+(assert (not (and false true)))
+(assert (not (and false false)))
+
+(discard (quote (
+    OR OPERATOR
+)))
+
+(set (quote or)
+    (lambda (quote a) (quote b)
+        (quote (branch a
+            (quote true)
+            (quote (not (not b)))
+        ))
+    )
+)
+
+(assert      (or true true))
+(assert      (or true false))
+(assert      (or false true))
+(assert (not (or false false)))
+
+(discard (quote (
+    XOR OPERATOR
+)))
+
+(set (quote xor)
+    (lambda (quote a) (quote b)
+        (quote (eqtree? (not (not a)) (not b)))
+    )
+)
+
+(assert (not (xor true true)))
+(assert      (xor true false))
+(assert      (xor false true))
+(assert (not (xor false false)))
