@@ -1,6 +1,6 @@
 use super::{Interpreter, Value};
 
-pub const BUILTINS: [&str; 21] = [
+pub const BUILTINS: [&str; 22] = [
     // Core language
     "quote",
     "unquote",
@@ -13,6 +13,7 @@ pub const BUILTINS: [&str; 21] = [
     "eqtree?",
     // Namespace operators
     "set",
+    "del",
     // Operations on quoted expressions
     "q:append",
     "q:prepend",
@@ -175,6 +176,23 @@ pub fn call(intp: &mut Interpreter, name: String, args: Vec<Value>) -> Option<Re
                     }
                 } else {
                     Some(Err("Must bind to a quoted identifier".to_owned()))
+                }
+            }
+        },
+        // delete a symbol from namespace: (del (quote value_name))
+        "del" => {
+            if args.len() != 1 {
+                Some(Err("Arg count".to_owned()))
+            } else {
+                if let Value::Quot(q) = args[0].clone() {
+                    if let Value::Idfr(n) = (*q).clone() {
+                        intp.delete(n);
+                        Some(Ok(Value::Unit))
+                    } else {
+                        Some(Err("Can only delete a quoted identifier".to_owned()))
+                    }
+                } else {
+                    Some(Err("Can only delete a quoted identifier".to_owned()))
                 }
             }
         },

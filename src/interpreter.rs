@@ -42,6 +42,10 @@ impl Interpreter {
         self.namespace.insert(name, value);
     }
 
+    pub fn delete(&mut self, name: String) {
+        self.namespace.remove(&name);
+    }
+
     #[must_use]
     pub fn resolve(&self, name: String) -> Result<Value, String> {
         self.namespace
