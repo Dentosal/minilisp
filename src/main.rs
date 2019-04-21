@@ -2,10 +2,10 @@
 #![feature(box_syntax)]
 #![feature(box_patterns)]
 
-use std::env;
-
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
+
+use clap;
 
 mod corelib;
 mod interpreter;
@@ -16,10 +16,33 @@ pub use self::interpreter::Interpreter;
 pub use self::value::Value;
 
 fn main() {
+    // Parse arguments
+    let matches = clap::App::new("minilisp")
+        .version("0.1")
+        .about("The minilisp interpreter")
+        .arg(
+            clap::Arg::with_name("SOURCE")
+                .help("Source code file")
+                .required(false)
+                .index(1),
+        )
+        .arg(
+            clap::Arg::with_name("v")
+                .short("v")
+                .multiple(true)
+                .help("Verbosity level"),
+        )
+        .get_matches();
+
+    // Interpreter initalization
     let mut intp = Interpreter::new().init();
 
-    if let Some(filename) = env::args().skip(1).nth(0) {
-        if let Err(e) = intp.execute_file(filename.as_str()) {
+    if matches.occurrences_of("v") > 0 {
+        intp.set_debug_print(true);
+    }
+
+    if let Some(filename) = matches.value_of("SOURCE") {
+        if let Err(e) = intp.execute_file(filename) {
             println!("Error: {}", e);
         }
     } else {

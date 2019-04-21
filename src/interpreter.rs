@@ -10,12 +10,14 @@ use super::value::Value;
 pub struct Interpreter {
     namespace: HashMap<String, Value>,
     exec_depth: usize,
+    debug_print: bool,
 }
 impl Interpreter {
     pub fn new() -> Self {
         Self {
             namespace: HashMap::new(),
             exec_depth: 0,
+            debug_print: false,
         }
     }
 
@@ -32,6 +34,10 @@ impl Interpreter {
         self
     }
 
+    pub fn set_debug_print(&mut self, v: bool) {
+        self.debug_print = v;
+    }
+
     pub fn bind(&mut self, name: String, value: Value) {
         self.namespace.insert(name, value);
     }
@@ -46,6 +52,9 @@ impl Interpreter {
 
     #[must_use]
     pub fn execute_file(&mut self, filename: &str) -> Result<(), String> {
+        if self.debug_print {
+            println!("{}EXECUTING FILE: {}", " ".repeat(self.exec_depth * 2), filename);
+        }
         let source = fs::read_to_string(filename)
             .expect("Could not read file")
             .replace("\n", " ");
@@ -66,7 +75,10 @@ impl Interpreter {
 
     #[must_use]
     pub fn execute(&mut self, mut value: Value) -> Result<Value, String> {
-        // println!("{}EXEC: {}", " ".repeat(self.exec_depth * 2), value);
+        if self.debug_print {
+            println!("{}EXEC: {}", " ".repeat(self.exec_depth * 2), value);
+        }
+
         self.exec_depth += 1;
         loop {
             let oldv = value.clone();
@@ -76,13 +88,17 @@ impl Interpreter {
             }
         }
         self.exec_depth -= 1;
-        // println!("{}DONE: {}", " ".repeat(self.exec_depth * 2), value);
+        if self.debug_print {
+            println!("{}DONE: {}", " ".repeat(self.exec_depth * 2), value);
+        }
         Ok(value)
     }
 
     #[must_use]
     pub fn execute_step(&mut self, value: Value) -> Result<Value, String> {
-        // println!("{}EXEC s: {}", " ".repeat(self.exec_depth * 2), value);
+        if self.debug_print {
+            println!("{}EXEC s: {}", " ".repeat(self.exec_depth * 2), value);
+        }
         match value {
             Value::Idfr(name) => self.resolve(name),
             Value::Lmbd(params, box body) if params.is_empty() => Ok(body),
