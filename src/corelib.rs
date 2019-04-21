@@ -1,6 +1,7 @@
 use super::{Interpreter, Value};
 
 pub const BUILTINS: [&str; 21] = [
+    // Core language
     "quote",
     "unquote",
     "discard",
@@ -8,10 +9,11 @@ pub const BUILTINS: [&str; 21] = [
     "lambda",
     "block",
     "branch",
+    // Equality check
     "eqtree?",
+    // Namespace operators
     "set",
-    "println",
-    "dec",
+    // Operations on quoted expressions
     "q:append",
     "q:prepend",
     "q:first",
@@ -22,6 +24,10 @@ pub const BUILTINS: [&str; 21] = [
     "q:rot",
     "q:rotf",
     "q:expr?",
+    // I/O
+    "println",
+    // Integer operations
+    "dec",
 ];
 
 macro_rules! boolvalue {
