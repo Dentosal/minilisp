@@ -1,3 +1,4 @@
+# Countdown from 10 to 1
 (set (quote counter) (quote 10))
 (set (quote countdown)
     (quote (block

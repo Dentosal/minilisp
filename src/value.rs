@@ -20,9 +20,9 @@ pub enum Value {
 }
 impl Value {
     /// Expects a single value (expression) already checked syntactically valid
-    pub fn parse(mut tokens: Vec<String>) -> Result<Self, String> {
+    pub fn parse(mut tokens: Vec<parser::Token>) -> Result<Self, String> {
         assert!(!tokens.is_empty());
-        if tokens[0] == "(" {
+        if tokens[0] == parser::Token::OpenParen {
             let mut args = Vec::new();
             tokens = tokens[1..tokens.len() - 1].to_vec();
             while !tokens.is_empty() {
@@ -37,7 +37,11 @@ impl Value {
             }
         } else {
             assert_eq!(tokens.len(), 1);
-            Ok(Value::Idfr(tokens[0].clone()))
+            if let parser::Token::Symbol(sym) = tokens[0].clone() {
+                Ok(Value::Idfr(sym))
+            } else {
+                panic!("Invalid data passed to value");
+            }
         }
     }
 

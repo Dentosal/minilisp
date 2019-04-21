@@ -55,9 +55,7 @@ impl Interpreter {
         if self.debug_print {
             println!("{}EXECUTING FILE: {}", " ".repeat(self.exec_depth * 2), filename);
         }
-        let source = fs::read_to_string(filename)
-            .expect("Could not read file")
-            .replace("\n", " ");
+        let source = fs::read_to_string(filename).expect("Could not read file");
 
         self.execute_source(source)
     }

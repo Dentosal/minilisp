@@ -1,38 +1,79 @@
-pub fn split_tokens(s: String) -> Result<Vec<String>, ()> {
-    let mut parts: Vec<String> = Vec::new();
-    for c in s.chars() {
-        if c == ' ' {
-            parts.push(String::new());
-        } else if c == '(' || c == ')' {
-            parts.push(c.to_string());
-        } else if parts
-            .last()
-            .map(|p| p == "" || p == "(" || p == ")")
-            .unwrap_or(true)
-        {
-            parts.push(c.to_string());
-        } else {
-            let mut newt = parts.pop().unwrap();
-            newt.push(c);
-            parts.push(newt);
-        }
-    }
-    Ok(parts.iter().cloned().filter(|t| !t.is_empty()).collect())
+/// Language token
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Token {
+    /// `(`
+    OpenParen,
+    /// `)`
+    CloseParen,
+    /// Any non-paren word
+    Symbol(String),
 }
 
-pub fn take_expr(tokens: Vec<String>) -> Result<(Vec<String>, Vec<String>), String> {
+/// State of the split state machine
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum SplitMode {
+    /// Nothing currently in-progress
+    Start,
+    /// Append to previous token (current symbol) if possible
+    Symbol,
+    /// Comment, remove all until EOL
+    Comment,
+}
+
+/// Split source code to tokens, drops comments
+pub fn split_tokens(s: String) -> Result<Vec<Token>, ()> {
+    let mut tokens: Vec<Token> = Vec::new();
+    let mut mode = SplitMode::Start;
+    for c in s.chars() {
+        let (new_mode, new_token) = match mode {
+            SplitMode::Start | SplitMode::Symbol => match c {
+                ' ' => (SplitMode::Start, None),
+                '\n' => (SplitMode::Start, None),
+                '(' => (SplitMode::Start, Some(Token::OpenParen)),
+                ')' => (SplitMode::Start, Some(Token::CloseParen)),
+                '#' => (SplitMode::Comment, None),
+                _ => {
+                    if mode == SplitMode::Start {
+                        (SplitMode::Symbol, Some(Token::Symbol(c.to_string())))
+                    } else {
+                        // Append to previous symbol
+                        if let Token::Symbol(ref mut s) = tokens.last_mut().expect("Invalid state") {
+                            s.push(c);
+                        } else {
+                            panic!("Invalid state");
+                        }
+                        (SplitMode::Symbol, None)
+                    }
+                },
+            },
+            SplitMode::Comment => match c {
+                '\n' => (SplitMode::Start, None),
+                _ => (SplitMode::Comment, None),
+            },
+        };
+
+        mode = new_mode;
+        if let Some(token) = new_token {
+            tokens.push(token);
+        }
+    }
+
+    Ok(tokens)
+}
+
+pub fn take_expr(tokens: Vec<Token>) -> Result<(Vec<Token>, Vec<Token>), String> {
     if tokens.is_empty() {
         return Ok((Vec::new(), Vec::new()));
     }
 
-    match tokens.first().unwrap().as_str() {
-        "(" => {
+    match tokens.first().unwrap() {
+        Token::OpenParen => {
             let mut depth: usize = 1;
             let mut index: usize = 0;
             for (i, t) in tokens.iter().enumerate().skip(1) {
-                if t == "(" {
+                if t == &Token::OpenParen {
                     depth += 1;
-                } else if t == ")" {
+                } else if t == &Token::CloseParen {
                     depth -= 1;
                     if depth == 0 {
                         index = i + 1;
@@ -47,7 +88,7 @@ pub fn take_expr(tokens: Vec<String>) -> Result<(Vec<String>, Vec<String>), Stri
                 Ok((tokens[0..index].to_vec(), tokens[index..].to_vec()))
             }
         },
-        ")" => Err("Unbalanced (start)".to_owned()),
-        ident => Ok((vec![ident.to_owned()], tokens[1..].to_vec())),
+        Token::CloseParen => Err("Unbalanced (start)".to_owned()),
+        other => Ok((vec![other.clone()], tokens[1..].to_vec())),
     }
 }
