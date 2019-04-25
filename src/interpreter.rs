@@ -13,6 +13,7 @@ pub struct Interpreter {
     debug_print: bool,
 }
 impl Interpreter {
+    /// Create new, empty interpreter
     pub fn new() -> Self {
         Self {
             namespace: HashMap::new(),
@@ -21,6 +22,7 @@ impl Interpreter {
         }
     }
 
+    /// Bind corelib and stdlib functions
     pub fn init(mut self) -> Self {
         // Corelib builtins
         for &name in corelib::BUILTINS.iter() {
@@ -36,18 +38,22 @@ impl Interpreter {
         self
     }
 
+    /// Set debug printing on or off
     pub fn set_debug_print(&mut self, v: bool) {
         self.debug_print = v;
     }
 
+    /// Namespace bind
     pub fn bind(&mut self, name: String, value: Value) {
         self.namespace.insert(name, value);
     }
 
+    /// Namespace delete
     pub fn delete(&mut self, name: String) {
         self.namespace.remove(&name);
     }
 
+    /// Symbol name resolution
     #[must_use]
     pub fn resolve(&self, name: String) -> Result<Value, String> {
         self.namespace
@@ -56,6 +62,7 @@ impl Interpreter {
             .ok_or(format!("Resolution failed '{:?}'", name))
     }
 
+    /// Read file and execute contents
     #[must_use]
     pub fn execute_file(&mut self, filename: &str) -> Result<(), String> {
         if self.debug_print {
@@ -66,6 +73,7 @@ impl Interpreter {
         self.execute_source(source)
     }
 
+    /// Execute source code text
     #[must_use]
     pub fn execute_source(&mut self, source: String) -> Result<(), String> {
         let mut tokens = parser::split_tokens(source).unwrap();
@@ -77,6 +85,7 @@ impl Interpreter {
         Ok(())
     }
 
+    /// Execute a value
     #[must_use]
     pub fn execute(&mut self, mut value: Value) -> Result<Value, String> {
         if self.debug_print {
@@ -98,6 +107,7 @@ impl Interpreter {
         Ok(value)
     }
 
+    /// Do one reduction step on a value
     #[must_use]
     pub fn execute_step(&mut self, value: Value) -> Result<Value, String> {
         if self.debug_print {
@@ -157,7 +167,11 @@ impl Interpreter {
                                         "{}EXEC b: ({} {})",
                                         " ".repeat(self.exec_depth * 2),
                                         name,
-                                        args_e.iter().map(|a| format!("{}", a)).collect::<Vec<_>>().join(" ")
+                                        args_e
+                                            .iter()
+                                            .map(|a| format!("{}", a))
+                                            .collect::<Vec<_>>()
+                                            .join(" ")
                                     );
                                 }
 

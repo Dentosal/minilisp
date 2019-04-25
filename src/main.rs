@@ -1,3 +1,8 @@
+//! MiniLisp interpreter
+
+// Lints
+#![deny(missing_docs)]
+// Nightly features
 #![feature(bind_by_move_pattern_guards)]
 #![feature(box_syntax)]
 #![feature(box_patterns)]
