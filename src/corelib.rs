@@ -114,6 +114,11 @@ pub fn call(intp: &mut Interpreter, name: String, args: Vec<Value>) -> Option<Re
                 Some(Err("Arg count".to_owned()))
             } else {
                 if args[0] != Value::Unit {
+                    // strict true check
+                    if args[0] != Value::Quot(box Value::Idfr("true".to_owned())) {
+                        return Some(Err("Strict true required".to_owned()));
+                    }
+
                     // true branch
                     Some(Ok(Value::Expr(vec![
                         Value::Bltn("unquote".to_owned()),
