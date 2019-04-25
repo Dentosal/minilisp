@@ -1,0 +1,223 @@
+# Peano integers
+
+(set (quote P_next) (lambda (quote i) (quote (quote i))))
+(set (quote P_ZERO) (quote P_ZERO))
+
+(set (quote 0) P_ZERO)
+(set (quote 1) (P_next 0))
+(set (quote 2) (P_next 1))
+(set (quote 3) (P_next 2))
+(set (quote 4) (P_next 3))
+(set (quote 5) (P_next 4))
+(set (quote 6) (P_next 5))
+(set (quote 7) (P_next 6))
+(set (quote 8) (P_next 7))
+(set (quote 9) (P_next 8))
+
+(assert (eqtree?
+    (P_next (P_next 5))
+    7
+))
+
+# Integer operations
+
+# Zero-check
+
+(set (quote P_zero?)
+    (lambda (quote n)
+        (quote (eqtree? n 0))
+    )
+)
+
+(assert (P_zero? 0))
+(assert (not (P_zero? 1)))
+(assert (not (P_zero? 2)))
+
+# Increment
+
+(set (quote P_inc)
+    (lambda (quote n)
+        (quote (quote n))
+    )
+)
+
+(assert (eqtree? 5 (P_inc (P_inc 3))))
+(assert (eqtree? 5 (P_inc 4)))
+(assert (eqtree? 1 (P_inc 0)))
+
+# Decrement
+
+(set (quote P_dec)
+    (lambda (quote n)
+        (quote (branch (P_zero? n)
+            (quote (error (decrementing peano zero not allowed)))
+            (quote (unquote n))
+        ))
+    )
+)
+
+(assert (eqtree? 5 (P_dec (P_dec 7))))
+(assert (eqtree? 5 (P_dec 6)))
+(assert (eqtree? 1 (P_dec 2)))
+(assert (P_zero? (P_dec 1)))
+
+# Comparison
+
+(set (quote P_lt?)
+    (lambda (quote a) (quote b)
+        (quote (branch (P_zero? b)
+            (quote false)
+            (quote (branch (P_zero? a)
+                (quote true)
+                (quote (P_lt? (P_dec a) (P_dec b)))
+            ))
+        ))
+    )
+)
+
+(set (quote P_gt?)
+    (lambda (quote a) (quote b)
+        (quote (and (not (eqtree? a b)) (not (P_lt? a b))))
+    )
+)
+
+(assert (P_lt? 0 1))
+(assert (P_lt? 0 2))
+(assert (P_lt? 1 2))
+(assert (P_lt? 1 5))
+(assert (not (P_lt? 1 0)))
+(assert (not (P_lt? 2 0)))
+(assert (not (P_lt? 2 1)))
+(assert (not (P_lt? 5 1)))
+
+(assert (P_gt? 1 0))
+(assert (P_gt? 2 0))
+(assert (P_gt? 2 1))
+(assert (P_gt? 5 1))
+(assert (not (P_gt? 0 1)))
+(assert (not (P_gt? 0 2)))
+(assert (not (P_gt? 1 2)))
+(assert (not (P_gt? 1 5)))
+
+# Min and max
+
+(set (quote P_min)
+    (lambda (quote a) (quote b)
+        (quote (branch (P_lt? a b)
+            (quote a)
+            (quote b)
+        ))
+    )
+)
+
+(set (quote P_max)
+    (lambda (quote a) (quote b)
+        (quote (branch (P_lt? a b)
+            (quote b)
+            (quote a)
+        ))
+    )
+)
+
+(assert (eqtree? 0 (P_min 0 0)))
+(assert (eqtree? 0 (P_min 0 1)))
+(assert (eqtree? 0 (P_min 0 3)))
+(assert (eqtree? 1 (P_min 1 3)))
+(assert (eqtree? 0 (P_min 1 0)))
+(assert (eqtree? 0 (P_min 3 0)))
+(assert (eqtree? 2 (P_min 3 2)))
+(assert (eqtree? 3 (P_min 3 3)))
+
+(assert (eqtree? 0 (P_max 0 0)))
+(assert (eqtree? 1 (P_max 0 1)))
+(assert (eqtree? 3 (P_max 0 3)))
+(assert (eqtree? 3 (P_max 1 3)))
+(assert (eqtree? 1 (P_max 1 0)))
+(assert (eqtree? 3 (P_max 3 0)))
+(assert (eqtree? 3 (P_max 3 2)))
+(assert (eqtree? 3 (P_min 3 3)))
+
+# Addition
+
+(set (quote P_add)
+    (lambda (quote a) (quote b)
+        (quote (branch (P_zero? a)
+            (quote b)
+            (quote (P_add (P_dec a) (P_inc b)))
+        ))
+    )
+)
+
+(assert (eqtree? 0 (P_add 0 0)))
+(assert (eqtree? 1 (P_add 0 1)))
+(assert (eqtree? 1 (P_add 1 0)))
+(assert (eqtree? 2 (P_add 1 1)))
+(assert (eqtree? 3 (P_add 1 2)))
+(assert (eqtree? 4 (P_add 2 2)))
+(assert (eqtree? 2 (P_add 2 0)))
+(assert (eqtree? 2 (P_add 0 2)))
+
+# Subtraction
+
+(set (quote P_sub_nocheck)
+    (lambda (quote a) (quote b)
+        (quote (branch (P_zero? b)
+            (quote a)
+            (quote (P_sub_nocheck (P_dec a) (P_dec b)))
+        ))
+    )
+)
+
+(set (quote P_sub)
+    (lambda (quote a) (quote b)
+        (quote (branch (P_lt? a b)
+            (quote (error (subtraction would underflow)))
+            (quote (P_sub_nocheck a b))
+        ))
+    )
+)
+
+(assert (eqtree? 0 (P_sub 0 0)))
+(assert (eqtree? 1 (P_sub 1 0)))
+(assert (eqtree? 0 (P_sub 1 1)))
+(assert (eqtree? 0 (P_sub 2 2)))
+(assert (eqtree? 2 (P_sub 2 0)))
+(assert (eqtree? 1 (P_sub 3 2)))
+
+# Multiplication
+
+(set (quote P_mul_helper)
+    (lambda (quote a) (quote b) (quote c)
+        (quote (branch (P_zero? c)
+            (quote a)
+            (quote (P_mul_helper (P_add a b) b (P_dec c)))
+        ))
+    )
+)
+
+(set (quote P_mul_lt_nocheck)
+    (lambda (quote a) (quote b)
+        (quote (branch (P_zero? a)
+            (quote 0)
+            (quote (P_mul_helper 0 b a))
+        ))
+    )
+)
+
+(set (quote P_mul)
+    (lambda (quote a) (quote b)
+        (quote (P_mul_lt_nocheck (P_min a b) (P_max a b)))
+    )
+)
+
+
+(assert (eqtree? 0 (P_mul 0 0)))
+(assert (eqtree? 0 (P_mul 0 5)))
+(assert (eqtree? 0 (P_mul 5 0)))
+(assert (eqtree? 5 (P_mul 1 5)))
+(assert (eqtree? 5 (P_mul 5 1)))
+(assert (eqtree? 4 (P_mul 2 2)))
+(assert (eqtree? 5 (P_mul 5 1)))
+(assert (eqtree? 6 (P_mul 2 3)))
+(assert (eqtree? 6 (P_mul 3 2)))
+(assert (eqtree? 9 (P_mul 3 3)))

@@ -50,7 +50,9 @@ impl Value {
         match self {
             Value::Unit => Value::Unit,
             Value::Idfr(n) if n == sym => val.clone(),
-            Value::Quot(q) => q.replace(sym, val),
+            Value::Idfr(n) => Value::Idfr(n),
+            Value::Bltn(n) => Value::Bltn(n),
+            Value::Quot(q) => Value::Quot(box q.replace(sym, val)),
             Value::Expr(e) => Value::Expr(
                 e.into_iter()
                     .map(|q| q.replace(sym, val.clone()))
@@ -64,7 +66,6 @@ impl Value {
                     Value::Lmbd(a, box b.replace(sym, val))
                 }
             },
-            a => a,
         }
     }
 

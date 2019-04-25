@@ -1,35 +1,29 @@
-(discard (quote (
-    BOOLEANS AND RELATED OPERATORS
-)))
+# Booleans and logic functions
 
 (set (quote false) ())
 (set (quote true) (quote true))
 
-
-(discard (quote (
-    NOT OPERATOR
-)))
+# NOT
 
 (set (quote not)
     (lambda (quote b)
-        (quote (branch (eqtree? b false)
-            (quote true)
+        (quote (branch b
             (quote false)
+            (quote true)
         ))
     )
 )
 
 (assert true)
 (assert (not false))
+(assert (not (not true)))
 
 (assert (eqtree? false (not true)))
 (assert (eqtree? true (not false)))
 (assert (eqtree? true (not (not true))))
 (assert (eqtree? false (not (not false))))
 
-(discard (quote (
-    AND OPERATOR
-)))
+# AND
 
 (set (quote and)
     (lambda (quote a) (quote b)
@@ -45,9 +39,7 @@
 (assert (not (and false true)))
 (assert (not (and false false)))
 
-(discard (quote (
-    OR OPERATOR
-)))
+# OR
 
 (set (quote or)
     (lambda (quote a) (quote b)
@@ -63,9 +55,7 @@
 (assert      (or false true))
 (assert (not (or false false)))
 
-(discard (quote (
-    XOR OPERATOR
-)))
+# XOR
 
 (set (quote xor)
     (lambda (quote a) (quote b)

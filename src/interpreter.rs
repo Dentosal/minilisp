@@ -29,7 +29,9 @@ impl Interpreter {
         }
 
         // Stdlib / prelude imports
+        // self.debug_print = true;
         self.execute_file("src/stdlib/logic.mls").expect("STDLIB ERROR");
+        self.execute_file("src/stdlib/peano.mls").expect("STDLIB ERROR");
 
         self
     }
@@ -103,7 +105,13 @@ impl Interpreter {
         }
         match value {
             Value::Idfr(name) => self.resolve(name),
-            Value::Lmbd(params, box body) if params.is_empty() => Ok(body),
+            Value::Lmbd(params, box body) if params.is_empty() => {
+                if let Value::Quot(box q) = body {
+                    Ok(q)
+                } else {
+                    Err("Lambda body must be quoted".to_owned())
+                }
+            },
             Value::Expr(args) => {
                 if args.len() == 1 {
                     Ok(args[0].clone())
@@ -122,7 +130,16 @@ impl Interpreter {
                             Ok(Value::Expr(newargs))
                         },
                         Value::Bltn(name) => {
-                            if name == "quote" {
+                            if name == "error" {
+                                Err(format!(
+                                    "Runtime Error: {}",
+                                    args[1..]
+                                        .iter()
+                                        .map(|a| format!("{}", a))
+                                        .collect::<Vec<_>>()
+                                        .join(" ")
+                                ))
+                            } else if name == "quote" {
                                 if args.len() == 2 {
                                     Ok(Value::Quot(box args[1].clone()))
                                 } else {
@@ -134,6 +151,15 @@ impl Interpreter {
                                     .cloned()
                                     .map(|a| self.execute(a))
                                     .collect::<Result<_, _>>()?;
+
+                                if self.debug_print {
+                                    println!(
+                                        "{}EXEC b: ({} {})",
+                                        " ".repeat(self.exec_depth * 2),
+                                        name,
+                                        args_e.iter().map(|a| format!("{}", a)).collect::<Vec<_>>().join(" ")
+                                    );
+                                }
 
                                 corelib::call(self, name, args_e).ok_or("Function not found")?
                             }
@@ -147,7 +173,8 @@ impl Interpreter {
                                 }
                             } else {
                                 let sym = params[0].clone();
-                                let val = args[1].clone();
+                                let val = self.execute(args[1].clone())?;
+
                                 Ok(Value::Expr(
                                     vec![Value::Lmbd(params[1..].to_vec(), box (*body).replace(&sym, val))]
                                         .iter()
@@ -157,7 +184,7 @@ impl Interpreter {
                                 ))
                             }
                         },
-                        Value::Quot(_) => Err("Quote cannot be executed".to_owned()),
+                        Value::Quot(q) => Err(format!("Quote cannot be executed: {}", q)),
                         _ => Ok(Value::Expr(args)),
                     }
                 }

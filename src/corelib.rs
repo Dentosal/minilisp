@@ -1,8 +1,10 @@
 use super::{Interpreter, Value};
 
 pub const BUILTINS: [&str; 22] = [
-    // Core language
+    // Special items
+    "error",
     "quote",
+    // Core language
     "unquote",
     "discard",
     "assert",
@@ -27,8 +29,6 @@ pub const BUILTINS: [&str; 22] = [
     "q:expr?",
     // I/O
     "println",
-    // Integer operations
-    "dec",
 ];
 
 macro_rules! boolvalue {
@@ -46,22 +46,6 @@ macro_rules! boolvalue {
 #[must_use]
 pub fn call(intp: &mut Interpreter, name: String, args: Vec<Value>) -> Option<Result<Value, String>> {
     match name.as_str() {
-        // decrement
-        "dec" => {
-            if args.len() != 1 {
-                return Some(Err("Arg count".to_owned()));
-            }
-            if let Value::Quot(box Value::Idfr(e)) = args[0].clone() {
-                if let Ok(mut v) = e.parse::<u32>() {
-                    v -= 1;
-                    Some(Ok(Value::Quot(box Value::Idfr(v.to_string()))))
-                } else {
-                    Some(Ok(Value::Unit))
-                }
-            } else {
-                Some(Ok(Value::Unit))
-            }
-        },
         // evaluate quoted expression
         "unquote" => {
             if args.len() != 1 {
