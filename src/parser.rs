@@ -1,3 +1,5 @@
+//! Parser
+
 /// Language token
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Token {
@@ -61,6 +63,7 @@ pub fn split_tokens(s: String) -> Result<Vec<Token>, ()> {
     Ok(tokens)
 }
 
+/// Split vector of tokens to a single expression and rest of the vector
 pub fn take_expr(tokens: Vec<Token>) -> Result<(Vec<Token>, Vec<Token>), String> {
     if tokens.is_empty() {
         return Ok((Vec::new(), Vec::new()));

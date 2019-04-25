@@ -1,24 +1,13 @@
 //! MiniLisp interpreter
 
-// Lints
-#![deny(missing_docs)]
-// Nightly features
-#![feature(bind_by_move_pattern_guards)]
-#![feature(box_syntax)]
-#![feature(box_patterns)]
-
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
 
 use clap;
 
-mod corelib;
-mod interpreter;
-mod parser;
-mod value;
-
-pub use self::interpreter::Interpreter;
-pub use self::value::Value;
+use minilisp::parser;
+use minilisp::Interpreter;
+use minilisp::Value;
 
 fn main() {
     // Parse arguments

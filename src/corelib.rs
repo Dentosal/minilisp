@@ -1,6 +1,6 @@
 use super::{Interpreter, Value};
 
-pub const BUILTINS: [&str; 22] = [
+pub const BUILTINS: [&str; 23] = [
     // Special items
     "error",
     "quote",
@@ -17,6 +17,7 @@ pub const BUILTINS: [&str; 22] = [
     "set",
     "del",
     // Operations on quoted expressions
+    "q:concat",
     "q:append",
     "q:prepend",
     "q:first",
@@ -133,6 +134,28 @@ pub fn call(intp: &mut Interpreter, name: String, args: Vec<Value>) -> Option<Re
                 Some(Err("Arg count".to_owned()))
             } else {
                 Some(Ok(boolvalue!(args[0] == args[1])))
+            }
+        },
+        // concatenate two quoted expressions
+        "q:concat" => {
+            if args.len() != 2 {
+                Some(Err("Arg count".to_owned()))
+            } else {
+                if let Value::Quot(box Value::Expr(e0)) = args[0].clone() {
+                    if let Value::Quot(box Value::Expr(e1)) = args[1].clone() {
+                        Some(Ok(Value::Quot(box Value::Expr(
+                            e0.iter().chain(e1.iter()).cloned().collect(),
+                        ))))
+                    } else if let Value::Quot(box Value::Unit) = args[0] {
+                        Some(Ok(Value::Quot(box Value::Unit)))
+                    } else {
+                        Some(Err("Quoted expression required".to_owned()))
+                    }
+                } else if let Value::Quot(box Value::Unit) = args[0] {
+                    Some(Ok(args[1].clone()))
+                } else {
+                    Some(Err("Quoted expression required".to_owned()))
+                }
             }
         },
         // test if the top-level item in quotes is an expression

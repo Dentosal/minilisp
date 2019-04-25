@@ -1,5 +1,7 @@
 use std::collections::HashMap;
+use std::fmt::Debug;
 use std::fs;
+use std::path::Path;
 
 use super::corelib;
 use super::parser;
@@ -64,11 +66,11 @@ impl Interpreter {
 
     /// Read file and execute contents
     #[must_use]
-    pub fn execute_file(&mut self, filename: &str) -> Result<(), String> {
+    pub fn execute_file<P: AsRef<Path> + Debug>(&mut self, path: P) -> Result<(), String> {
         if self.debug_print {
-            println!("{}EXECUTING FILE: {}", " ".repeat(self.exec_depth * 2), filename);
+            println!("{}EXECUTING FILE: {:?}", " ".repeat(self.exec_depth * 2), path);
         }
-        let source = fs::read_to_string(filename).expect("Could not read file");
+        let source = fs::read_to_string(path).expect("Could not read file");
 
         self.execute_source(source)
     }
