@@ -1,0 +1,6 @@
+(assert true)
+
+(assert (eqtree? true true))
+(assert (eqtree? false false))
+
+(assert (not (discard (quote (anything here)))))

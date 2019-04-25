@@ -120,8 +120,10 @@ impl Interpreter {
             Value::Lmbd(params, box body) if params.is_empty() => {
                 if let Value::Quot(box q) = body {
                     Ok(q)
+                } else if let Value::Lmbd(a, box b) = body {
+                    Ok(Value::Lmbd(a, box b))
                 } else {
-                    Err("Lambda body must be quoted".to_owned())
+                    Err("Lambda body must be quoted or another lambda".to_owned())
                 }
             },
             Value::Expr(args) => {
@@ -183,7 +185,25 @@ impl Interpreter {
                         Value::Lmbd(params, body) => {
                             if params.is_empty() {
                                 if args.len() > 1 {
-                                    Err("Trying to apply too much arguments to a lambda".to_owned())
+                                    if let Value::Quot(box q) = *body {
+                                        Ok(Value::Expr(
+                                            vec![q]
+                                                .iter()
+                                                .chain(args[1..args.len()].iter())
+                                                .cloned()
+                                                .collect(),
+                                        ))
+                                    } else if let Value::Lmbd(a, box b) = *body {
+                                        Ok(Value::Expr(
+                                            vec![Value::Lmbd(a, box b)]
+                                                .iter()
+                                                .chain(args[1..args.len()].iter())
+                                                .cloned()
+                                                .collect(),
+                                        ))
+                                    } else {
+                                        Err("Lambda body must be quoted or another lambda".to_owned())
+                                    }
                                 } else {
                                     Ok(*body)
                                 }

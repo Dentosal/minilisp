@@ -1,0 +1,53 @@
+# Discarding lambda check
+(set (quote first)
+    (lambda (quote a) (quote b)
+        (quote a)
+    )
+)
+
+(set (quote second)
+    (lambda (quote a) (quote b)
+        (quote b)
+    )
+)
+
+(assert (eqtree? 1 (first 1 2)))
+(assert (eqtree? 2 (second 1 2)))
+
+# Nested lambda check
+(set (quote nested)
+    (lambda (quote a)
+        (quote (lambda (quote b)
+            (quote (and a b))
+        ))
+    )
+)
+
+(assert (nested true true))
+(assert (not (nested true false)))
+(assert (not (nested false true)))
+(assert (not (nested false false)))
+
+(assert ((nested true) true))
+(assert (not ((nested true) false)))
+(assert (not ((nested false) true)))
+(assert (not ((nested false) false)))
+
+# Nested lambda name shadowing
+(set (quote nested)
+    (lambda (quote b)
+        (lambda (quote b)
+            (quote (and b b))
+        )
+    )
+)
+
+(assert (nested true true))
+(assert (not (nested true false)))
+(assert (nested false true))
+(assert (not (nested false false)))
+
+(assert ((nested true) true))
+(assert (not ((nested true) false)))
+(assert ((nested false) true))
+(assert (not ((nested false) false)))
