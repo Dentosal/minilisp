@@ -1,10 +1,10 @@
 # Countdown from 10 to 1
-(set (quote counter) (P_inc 9))
+(set (quote counter) (p:inc 9))
 (set (quote countdown)
     (quote (block
         (quote (println counter))
-        (quote (set (quote counter) (P_dec counter)))
-        (quote (branch (P_zero? counter)
+        (quote (set (quote counter) (p:dec counter)))
+        (quote (branch (p:zero? counter)
             (quote ())
             (quote (unquote countdown))
         ))

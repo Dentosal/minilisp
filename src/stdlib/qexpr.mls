@@ -5,7 +5,7 @@
     (lambda (quote list) (quote n)
         (quote (branch (q:empty? list)
             (quote n)
-            (quote (q:length_helper (q:tail list) (P_inc n)))
+            (quote (q:length_helper (q:tail list) (p:inc n)))
         ))
     )
 )

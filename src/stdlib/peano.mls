@@ -1,24 +1,24 @@
 # Peano integers
 
-(set (quote P_next) (lambda (quote i) (quote (quote i))))
-(set (quote P_ZERO) (quote P_ZERO))
+(set (quote p:next) (lambda (quote i) (quote (quote i))))
+(set (quote p:ZERO) (quote p:ZERO))
 
-(set (quote 0) P_ZERO)
-(set (quote 1) (P_next 0))
-(set (quote 2) (P_next 1))
-(set (quote 3) (P_next 2))
-(set (quote 4) (P_next 3))
-(set (quote 5) (P_next 4))
-(set (quote 6) (P_next 5))
-(set (quote 7) (P_next 6))
-(set (quote 8) (P_next 7))
-(set (quote 9) (P_next 8))
+(set (quote 0) p:ZERO)
+(set (quote 1) (p:next 0))
+(set (quote 2) (p:next 1))
+(set (quote 3) (p:next 2))
+(set (quote 4) (p:next 3))
+(set (quote 5) (p:next 4))
+(set (quote 6) (p:next 5))
+(set (quote 7) (p:next 6))
+(set (quote 8) (p:next 7))
+(set (quote 9) (p:next 8))
 
 # Integer operations
 
 # Zero-check
 
-(set (quote P_zero?)
+(set (quote p:zero?)
     (lambda (quote n)
         (quote (eqtree? n 0))
     )
@@ -26,7 +26,7 @@
 
 # Increment
 
-(set (quote P_inc)
+(set (quote p:inc)
     (lambda (quote n)
         (quote (quote n))
     )
@@ -34,9 +34,9 @@
 
 # Decrement
 
-(set (quote P_dec)
+(set (quote p:dec)
     (lambda (quote n)
-        (quote (branch (P_zero? n)
+        (quote (branch (p:zero? n)
             (quote (error (decrementing peano zero not allowed)))
             (quote (unquote n))
         ))
@@ -45,38 +45,38 @@
 
 # Comparison
 
-(set (quote P_lt?)
+(set (quote p:lt?)
     (lambda (quote a) (quote b)
-        (quote (branch (P_zero? b)
+        (quote (branch (p:zero? b)
             (quote false)
-            (quote (branch (P_zero? a)
+            (quote (branch (p:zero? a)
                 (quote true)
-                (quote (P_lt? (P_dec a) (P_dec b)))
+                (quote (p:lt? (p:dec a) (p:dec b)))
             ))
         ))
     )
 )
 
-(set (quote P_gt?)
+(set (quote p:gt?)
     (lambda (quote a) (quote b)
-        (quote (and (not (eqtree? a b)) (not (P_lt? a b))))
+        (quote (and (not (eqtree? a b)) (not (p:lt? a b))))
     )
 )
 
 # Min and max
 
-(set (quote P_min)
+(set (quote p:min)
     (lambda (quote a) (quote b)
-        (quote (branch (P_lt? a b)
+        (quote (branch (p:lt? a b)
             (quote a)
             (quote b)
         ))
     )
 )
 
-(set (quote P_max)
+(set (quote p:max)
     (lambda (quote a) (quote b)
-        (quote (branch (P_lt? a b)
+        (quote (branch (p:lt? a b)
             (quote b)
             (quote a)
         ))
@@ -85,58 +85,58 @@
 
 # Addition
 
-(set (quote P_add)
+(set (quote p:add)
     (lambda (quote a) (quote b)
-        (quote (branch (P_zero? a)
+        (quote (branch (p:zero? a)
             (quote b)
-            (quote (P_add (P_dec a) (P_inc b)))
+            (quote (p:add (p:dec a) (p:inc b)))
         ))
     )
 )
 
 # Subtraction
 
-(set (quote P_sub_nocheck)
+(set (quote p:sub_nocheck)
     (lambda (quote a) (quote b)
-        (quote (branch (P_zero? b)
+        (quote (branch (p:zero? b)
             (quote a)
-            (quote (P_sub_nocheck (P_dec a) (P_dec b)))
+            (quote (p:sub_nocheck (p:dec a) (p:dec b)))
         ))
     )
 )
 
-(set (quote P_sub)
+(set (quote p:sub)
     (lambda (quote a) (quote b)
-        (quote (branch (P_lt? a b)
+        (quote (branch (p:lt? a b)
             (quote (error (subtraction would underflow)))
-            (quote (P_sub_nocheck a b))
+            (quote (p:sub_nocheck a b))
         ))
     )
 )
 
 # Multiplication
 
-(set (quote P_mul_helper)
+(set (quote p:mul_helper)
     (lambda (quote a) (quote b) (quote c)
-        (quote (branch (P_zero? c)
+        (quote (branch (p:zero? c)
             (quote a)
-            (quote (P_mul_helper (P_add a b) b (P_dec c)))
+            (quote (p:mul_helper (p:add a b) b (p:dec c)))
         ))
     )
 )
 
-(set (quote P_mul_lt_nocheck)
+(set (quote p:mul_lt_nocheck)
     (lambda (quote a) (quote b)
-        (quote (branch (P_zero? a)
+        (quote (branch (p:zero? a)
             (quote 0)
-            (quote (P_mul_helper 0 b a))
+            (quote (p:mul_helper 0 b a))
         ))
     )
 )
 
-(set (quote P_mul)
+(set (quote p:mul)
     (lambda (quote a) (quote b)
-        (quote (P_mul_lt_nocheck (P_min a b) (P_max a b)))
+        (quote (p:mul_lt_nocheck (p:min a b) (p:max a b)))
     )
 )
 
