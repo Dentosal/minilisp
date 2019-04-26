@@ -1,0 +1,7 @@
+
+# Append to the end of the list
+(set (quote q:append)
+    (lambda (quote list) (quote item)
+        (quote (q:concat list (quote (item))))
+    )
+)

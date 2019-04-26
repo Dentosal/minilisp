@@ -1,4 +1,4 @@
-use super::parser;
+use super::{parser, Interpreter};
 use std::fmt;
 
 /// A concrete run-time value
@@ -66,6 +66,29 @@ impl Value {
                     Value::Lmbd(a, box b.replace(sym, val))
                 }
             },
+        }
+    }
+
+    /// Recursively resolve all identifiers until a stop-idfr is reached
+    #[must_use]
+    pub fn resolve_all(self, intp: &Interpreter) -> Result<Self, String> {
+        match self {
+            Value::Unit => Ok(Value::Unit),
+            Value::Idfr(n) => {
+                if intp.is_stop_idfr(&n)? {
+                    Ok(Value::Idfr(n))
+                } else {
+                    intp.resolve(&n)?.resolve_all(intp)
+                }
+            },
+            Value::Bltn(n) => Ok(Value::Bltn(n)),
+            Value::Quot(q) => Ok(Value::Quot(box q.resolve_all(intp)?)),
+            Value::Expr(e) => Ok(Value::Expr(
+                e.into_iter()
+                    .map(|q| q.resolve_all(intp))
+                    .collect::<Result<Vec<_>, String>>()?,
+            )),
+            Value::Lmbd(_, _) => unimplemented!(),
         }
     }
 

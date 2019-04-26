@@ -36,6 +36,7 @@ impl Interpreter {
         // self.debug_print = true;
         self.execute_file("src/stdlib/logic.mls").expect("STDLIB ERROR");
         self.execute_file("src/stdlib/peano.mls").expect("STDLIB ERROR");
+        self.execute_file("src/stdlib/qexpr.mls").expect("STDLIB ERROR");
 
         self
     }
@@ -51,17 +52,23 @@ impl Interpreter {
     }
 
     /// Namespace delete
-    pub fn delete(&mut self, name: String) {
-        self.namespace.remove(&name);
+    pub fn delete(&mut self, name: &str) {
+        self.namespace.remove(name);
     }
 
     /// Symbol name resolution
     #[must_use]
-    pub fn resolve(&self, name: String) -> Result<Value, String> {
+    pub fn resolve(&self, name: &str) -> Result<Value, String> {
         self.namespace
-            .get(&name)
+            .get(name)
             .cloned()
             .ok_or(format!("Resolution failed '{:?}'", name))
+    }
+
+    /// Check if an identifier is stop-idfr, e.q. self-referencing
+    #[must_use]
+    pub fn is_stop_idfr(&self, name: &str) -> Result<bool, String> {
+        Ok(self.resolve(name)? == Value::Quot(box Value::Idfr(name.to_owned())))
     }
 
     /// Read file and execute contents
@@ -116,7 +123,7 @@ impl Interpreter {
             println!("{}EXEC s: {}", " ".repeat(self.exec_depth * 2), value);
         }
         match value {
-            Value::Idfr(name) => self.resolve(name),
+            Value::Idfr(name) => self.resolve(&name),
             Value::Lmbd(params, box body) if params.is_empty() => {
                 if let Value::Quot(box q) = body {
                     Ok(q)
@@ -138,7 +145,7 @@ impl Interpreter {
                             Ok(Value::Expr(newargs))
                         },
                         Value::Idfr(idfr) => {
-                            let na = self.resolve(idfr)?;
+                            let na = self.resolve(&idfr)?;
                             let mut newargs = vec![na];
                             newargs.extend_from_slice(&args[1..]);
                             Ok(Value::Expr(newargs))
@@ -179,7 +186,7 @@ impl Interpreter {
                                     );
                                 }
 
-                                corelib::call(self, name, args_e).ok_or("Function not found")?
+                                corelib::call(self, name, args_e)
                             }
                         },
                         Value::Lmbd(params, body) => {

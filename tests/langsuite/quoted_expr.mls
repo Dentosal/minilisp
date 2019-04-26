@@ -1,0 +1,109 @@
+(assert (q:expr? (quote ())))
+(assert (q:expr? (quote (a b c))))
+(assert (not (q:expr? (quote test))))
+(assert (not (q:expr? (quote 0))))
+
+(assert (eqtree?
+    (quote ())
+    (q:reverse
+        (quote ())
+    )
+))
+
+(assert (eqtree?
+    (quote (1))
+    (q:reverse
+        (quote (1))
+    )
+))
+
+(assert (eqtree?
+    (quote (3 2 1))
+    (q:reverse
+        (quote (1 2 3))
+    )
+))
+
+(assert (eqtree?
+    (quote (1 2 3))
+    (q:concat
+        (quote (1 2))
+        (quote (3))
+    )
+))
+
+(assert (eqtree?
+    (quote ((quote 1) (quote 2) (quote 3)))
+    (q:concat
+        (quote ((quote 1) (quote 2)))
+        (quote ((quote 3)))
+    )
+))
+
+(assert (eqtree?
+    (quote ())
+    (q:concat
+        (quote ())
+        (quote ())
+    )
+))
+
+(assert (eqtree?
+    (quote (1 2))
+    (q:concat
+        (quote (1 2))
+        (quote ())
+    )
+))
+
+(assert (eqtree?
+    (quote (1 2))
+    (q:concat
+        (quote ())
+        (quote (1 2))
+    )
+))
+
+(assert (eq?
+    (quote (1 2 3))
+    (q:append
+        (quote (1 2))
+        3
+    )
+))
+
+(assert (eq?
+    1
+    (q:head
+        (quote (1))
+    )
+))
+
+(assert (eq?
+    1
+    (q:head
+        (quote (1 2 3))
+    )
+))
+
+(assert (eqtree?
+    (quote ())
+    (q:tail
+        (quote ())
+    )
+))
+
+(assert (eq?
+    (quote (2 3))
+    (q:tail
+        (quote (1 2 3))
+    )
+))
+
+
+(assert (eq?
+    (quote ())
+    (q:tail
+        (quote (1))
+    )
+))
