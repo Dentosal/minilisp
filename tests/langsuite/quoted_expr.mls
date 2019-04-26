@@ -107,3 +107,38 @@
         (quote (1))
     )
 ))
+
+(assert (eq?
+    0
+    (q:length
+        (quote ())
+    )
+))
+
+(assert (eq?
+    1
+    (q:length
+        (quote (1))
+    )
+))
+
+(assert (eq?
+    2
+    (q:length
+        (quote (1 2))
+    )
+))
+
+(assert (eq?
+    3
+    (q:length
+        (quote (1 2 3))
+    )
+))
+
+(assert (eq?
+    2
+    (q:length
+        (quote (1 (2 3)))
+    )
+))

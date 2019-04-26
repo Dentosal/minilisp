@@ -1,3 +1,20 @@
+# Quote expression list functions
+
+# Length of the list as a peano integer
+(set (quote q:length_helper)
+    (lambda (quote list) (quote n)
+        (quote (branch (q:empty? list)
+            (quote n)
+            (quote (q:length_helper (q:tail list) (P_inc n)))
+        ))
+    )
+)
+
+(set (quote q:length)
+    (lambda (quote list)
+        (quote (q:length_helper list 0))
+    )
+)
 
 # Append to the end of the list
 (set (quote q:append)
